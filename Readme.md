@@ -13,3 +13,5 @@ Haven't yet figured out how this will be versioned.
 
 ## Authors
 ActioNet DS Challenge Team
+
+## Updates to this repo will appear in Slack
