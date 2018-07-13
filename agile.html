@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<meta name="robots" content="noindex">
+<html>
+
+  <head>
+    <!-- Twitter bootstrap -->
+    <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
+
+    <!-- apiCheck is used by formly to validate its api -->
+    <script src="http://npmcdn.com/api-check@latest/dist/api-check.js"></script>
+    <!-- This is the latest version of angular (at the time this template was created) -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.js"></script>
+
+    <!-- This is the current state of master for formly core. -->
+    <script src="http://npmcdn.com/angular-formly@latest/dist/formly.js"></script>
+    <!-- This is the current state of master for the bootstrap templates -->
+    <script src="http://npmcdn.com/angular-formly-templates-bootstrap@latest/dist/angular-formly-templates-bootstrap.js"></script>
+
+    <title>Agile Challenge Example Form</title>
+  <style id="jsbin-css">
+body {
+  margin: 20px
+}
+.formly-field {
+  margin-bottom:16px;
+}
+.btn-primary{
+background-color:#DA1C5C;
+}
+</style>
+</head>
+
+  <body ng-app="formlyExample" ng-controller="MainCtrl as vm">
+    <div>
+      <h1>Agile Challenge Form Example</h1>
+      <div>
+       This is where the information for your form will go. This form was built with Angular Formly. A tool that the Agile team can utilize
+          for quick form inputs and pre built controllers and scopes.
+      </div>
+      <form ng-submit="vm.onSubmit()" name="vm.form" novalidate>
+        <formly-form model="vm.model" fields="vm.fields" options="vm.options" form="vm.form">
+          <button type="submit" class="btn btn-primary submit-button" ng-disabled="vm.form.$invalid">Submit</button>
+          <button type="button" class="btn btn-default" ng-click="vm.options.resetModel()">Reset</button>
+        </formly-form>
+      </form>
+
+    </div>
+
+    <div style="margin-top:30px">
+      <small>
+        This is an example of an Angular form
+        <strong>
+          <span ng-if="!vm.author.name || !vm.author.url">
+            {{vm.author.name || 'anonymous'}}
+          </span>
+          <a ng-if="vm.author.url" ng-href="{{::vm.author.url}}">
+            {{vm.author.name}}
+          </a>
+        </strong>
+                
+      </small>
+    </div>
+    <!-- Put custom templates here -->
+    
+    <script type="text/ng-template" id="Agile.html">
+      <div class="form-group">
+        <label for="{{::id}}">{{options.templateOptions.label}}</label>
+        <input id="{{::id}}" name="{{::id}}" class="form-control" ng-model="model[options.key]" />
+      </div>
+    </script>
+    <script type="text/ng-template" id="example-directive.html">
+      <div class="form-group">
+        <label for="{{::id}}">{{options.templateOptions.label}}</label>
+        <input id="{{::id}}" name="{{::id}}" class="form-control" ng-model="model[options.key]" />
+      </div>
+    </script>
+
+  <script id="jsbin-javascript">
+console.clear(); // <-- keep the console clean on refresh
+/* global angular */
+(function() {
+  'use strict';
+  var app = angular.module('formlyExample', ['formly', 'formlyBootstrap'], function config(formlyConfigProvider) {
+    // set templates here
+    formlyConfigProvider.setType({
+      name: 'Agile',
+      templateUrl: 'Agile.html'
+    });
+  });
+  
+  app.controller('MainCtrl', function MainCtrl(formlyVersion) {
+    var vm = this;
+    // funcation assignment
+    vm.onSubmit = onSubmit;
+    // variable assignment
+    vm.author = { // optionally fill in your info below :-)
+      name: 'Joseph A Cain',
+      url: 'ActioNet.com' 
+    };
+    vm.exampleTitle = 'Agile Challenge Example';
+    vm.env = {
+      angularVersion: angular.version.full,
+      formlyVersion: formlyVersion
+    };
+    vm.model = {
+      awesome: true
+    };
+    vm.options = {
+      formState: {
+        awesomeIsForced: false
+      }
+    };
+    
+    vm.fields = [
+      {
+        key: 'text',
+        type: 'input',
+        templateOptions: {
+          label: 'Text',
+          placeholder: 'Agile Challenge Two Way Data Binding Form'
+        }
+      },
+      {
+        key: 'nested.story',
+        type: 'textarea',
+        templateOptions: {
+          label: 'Insert A Cool Story That You Know Noone is Interested In',
+            placeholder: 'Agile Challenge Two Way Data Binding Form',
+          description: ''
+        },
+        expressionProperties: {
+          'templateOptions.focus': 'formState.awesomeIsForced',
+          'templateOptions.description': function(viewValue, modelValue, scope) {
+            if (scope.formState.awesomeIsForced) {
+              return 'Input Info Data Here';
+            }
+          }
+        }
+      },
+      {
+        key: 'awesome',
+        type: 'checkbox',
+        templateOptions: { label: '' },
+        expressionProperties: {
+          'templateOptions.disabled': 'formState.awesomeIsForced',
+          'templateOptions.label': function(viewValue, modelValue, scope) {
+            if (scope.formState.awesomeIsForced) {
+              return 'Add your additional text here';
+            } else {
+              return 'Do you need an additional of Field? (Uncheck The Box If So)';
+            }
+          }
+        }
+      },
+      {
+        key: 'whyNot',
+        type: 'textarea',
+        expressionProperties: {
+          'templateOptions.placeholder': function(viewValue, modelValue, scope) {
+            if (scope.formState.awesomeIsForced) {
+              return 'Too bad... It really is awesome! Wasn\'t that cool?';
+            } else {
+              return 'More Data Please!!!!!';
+            }
+          },
+          'templateOptions.disabled': 'formState.awesomeIsForced'
+        },
+        hideExpression: 'model.awesome',
+        templateOptions: {
+          label: 'Input Your Data Here',
+          placeholder: 'I type this placeholder just for you'
+        },
+        watcher: {
+          listener: function(field, newValue, oldValue, formScope, stopWatching) {
+            if (newValue) {
+              stopWatching();
+              formScope.model.awesome = true;
+              formScope.model.whyNot = undefined;
+              field.hideExpression = null;
+              formScope.options.formState.awesomeIsForced = true;
+            }
+          }
+        }
+      },
+      {
+        key: 'custom',
+        type: 'custom',
+        templateOptions: {
+          label: 'Custom inlined',
+        }
+      },
+      {
+        key: 'exampleDirective',
+        template: '<div example-directive></div>',
+        templateOptions: {
+          label: 'Example Directive',
+        }
+      }
+    ];
+    // function definition
+    function onSubmit() {
+      alert(JSON.stringify(vm.model), null, 2);
+    }
+  });
+  
+  app.directive('exampleDirective', function() {
+    return {
+      templateUrl: 'example-directive.html'
+    };
+  });
+})();
+</script>
+</body>
+
+</html>
